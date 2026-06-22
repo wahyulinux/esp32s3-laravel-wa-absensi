@@ -89,6 +89,7 @@ espcam32s3-base64-api/
 | ESP32-S3 WROOM CAM | Modul kamera + WiFi utama |
 | RFID RC522 | Reader kartu RFID 13.56 MHz (SPI) |
 | Kartu RFID MIFARE 1K | Satu kartu per siswa |
+| Buzzer Aktif 5V | Umpan balik audio per status scan |
 
 **Wiring RFID RC522 → ESP32-S3:**
 
@@ -100,6 +101,13 @@ espcam32s3-base64-api/
 | MISO | 46 |
 | RST | 45 |
 | 3.3V / GND | 3.3V / GND |
+
+**Wiring Buzzer → ESP32-S3:**
+
+| Buzzer | ESP32-S3 GPIO |
+|---|---|
+| + (positif) | 14 (default, ubah `BUZZER_PIN` jika perlu) |
+| − (negatif) | GND |
 
 ---
 
@@ -203,6 +211,7 @@ Status koneksi juga terlihat di sidebar web app. Gunakan tombol power (🔴) unt
 | 201 | `masuk` | Absen masuk berhasil dicatat |
 | 200 | `keluar` | Absen pulang berhasil dicatat |
 | 409 | `sudah_lengkap` | Sudah absen masuk & pulang hari ini |
+| 422 | `terlalu_cepat` | Scan pulang < 1 jam setelah masuk (ditolak) |
 | 404 | — | Kartu tidak terdaftar / siswa tidak aktif |
 
 **Body POST `/api/v1/heartbeat`:**
@@ -259,17 +268,19 @@ GET /api/health
 ```
 Scan RFID
     │
-    ├─ Kartu tidak ditemukan → status: tidak_dikenal (404)
+    ├─ Kartu tidak ditemukan → tidak_dikenal (404) 🔴 3 beep cepat
     │
     └─ Siswa ditemukan
            │
-           ├─ Belum ada record hari ini → MASUK (201)
+           ├─ Belum ada record hari ini → MASUK (201) ✅ 2 beep pendek
            │   └─ Kirim foto + notif WA ke orang tua
            │
-           ├─ Sudah masuk, belum pulang → KELUAR (200)
-           │   └─ Kirim foto + notif WA ke orang tua
+           ├─ Sudah masuk, belum pulang
+           │   ├─ < 1 jam sejak masuk → terlalu_cepat (422) ⚠️ 3 beep sedang
+           │   └─ ≥ 1 jam sejak masuk → KELUAR (200) ✅ 1 beep panjang
+           │       └─ Kirim foto + notif WA ke orang tua
            │
-           └─ Sudah masuk & pulang → sudah_lengkap (409)
+           └─ Sudah masuk & pulang → sudah_lengkap (409) ⚠️ 3 beep sedang
 ```
 
 ---
@@ -294,7 +305,9 @@ WA Gateway berjalan di port **3001** menggunakan [Baileys](https://github.com/Wh
 | `GET /status` | Status JSON (`connected`, `qr`) |
 | `POST /send` | Kirim pesan teks (`to`, `message`) |
 | `POST /send-image` | Kirim foto + caption (`to`, `caption`, `image_base64`) |
-| `POST /logout` | Putuskan sesi + hapus file sesi |
+| `POST /logout` | Putuskan sesi + hapus file sesi, lalu reconnect untuk QR baru |
+
+Tombol disconnect juga tersedia di sidebar web app (ikon power merah, muncul hanya saat WA terhubung).
 
 Sesi disimpan di Docker volume `wa_session` sehingga tidak perlu scan QR ulang setelah restart container.
 
@@ -305,4 +318,6 @@ Sesi disimpan di Docker volume `wa_session` sehingga tidak perlu scan QR ulang s
 - **Tailwind CSS** digunakan via CDN (Play CDN) — jangan gunakan `@apply` di `<style>` tag, selalu tulis class langsung di HTML.
 - **Log RFID** disimpan di Laravel Cache (file driver), bukan database — otomatis hangus setelah 7 hari.
 - **Docker bind mount** — jika mengedit file host dan container tidak melihat perubahan, gunakan `docker cp` untuk menyalin file secara eksplisit ke container.
+- **Buzzer** — implementasi menggunakan buzzer aktif (active buzzer) dengan `digitalWrite`. Jika memakai buzzer pasif, ganti dengan `tone(BUZZER_PIN, freq, durasi)`. Pin default GPIO 14, ubah konstanta `BUZZER_PIN` di sketch jika perlu.
+- **Durasi minimal absen pulang** — dikunci 60 menit di server (`AbsensiController`). Ubah nilai `60` pada kondisi `$menitSejakMasuk < 60` untuk menyesuaikan kebijakan sekolah.
 # esp32s3-laravel-wa-absensi

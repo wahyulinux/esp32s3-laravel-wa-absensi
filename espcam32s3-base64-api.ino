@@ -19,6 +19,9 @@ const char* firmware_version = "1.0.0";
 const unsigned long HEARTBEAT_INTERVAL = 60000UL; // kirim setiap 60 detik
 unsigned long lastHeartbeatMs = 0;
 
+// --- PIN BUZZER ---
+#define BUZZER_PIN    14   // Ganti sesuai pin yang digunakan
+
 // --- DEFINISI PIN RFID RC522 (SPI KUSTOM) ---
 #define rfid_ss_pin    2
 #define rfid_rst_pin  45
@@ -46,6 +49,25 @@ MFRC522 rfid(rfid_ss_pin, rfid_rst_pin);
 #define HREF_GPIO_NUM    7
 #define PCLK_GPIO_NUM   13
 
+// --- Buzzer ---
+void beep(int count, int onMs, int offMs = 80) {
+  for (int i = 0; i < count; i++) {
+    digitalWrite(BUZZER_PIN, HIGH);
+    delay(onMs);
+    digitalWrite(BUZZER_PIN, LOW);
+    if (i < count - 1) delay(offMs);
+  }
+}
+
+// ✅ Absen masuk  — 2 beep pendek
+void buzzerMasuk()        { beep(2, 100, 80); }
+// ✅ Absen pulang — 1 beep panjang
+void buzzerKeluar()       { beep(1, 600); }
+// ⚠️ Sudah lengkap / terlalu cepat — 3 beep sedang
+void buzzerDitolak()      { beep(3, 200, 100); }
+// ❌ Kartu tidak dikenal / error — 3 beep cepat
+void buzzerError()        { beep(3, 80, 60); }
+
 // --- Cetak garis pemisah ---
 void printLine() {
   Serial.println("======================================");
@@ -62,6 +84,7 @@ void tampilkanRespon(int httpCode, const String& responseBody) {
     Serial.println("  STATUS  : KARTU TIDAK DIKENAL");
     Serial.println("  PESAN   : Kartu belum terdaftar di sistem");
     printLine();
+    buzzerError();
     return;
   }
 
@@ -74,6 +97,7 @@ void tampilkanRespon(int httpCode, const String& responseBody) {
     Serial.printf("  HTTP    : %d\n", httpCode);
     Serial.println("  RESPON  : " + responseBody);
     printLine();
+    buzzerError();
     return;
   }
 
@@ -83,8 +107,9 @@ void tampilkanRespon(int httpCode, const String& responseBody) {
 
   if (success) {
     // Normalkan status ke huruf besar untuk Serial Monitor
-    status.toUpperCase();
-    Serial.printf("  STATUS  : %s\n",  status.c_str());
+    String statusUpper = status;
+    statusUpper.toUpperCase();
+    Serial.printf("  STATUS  : %s\n",  statusUpper.c_str());
     Serial.printf("  PESAN   : %s\n",  pesan.c_str());
 
     JsonObject data = doc["data"];
@@ -112,15 +137,24 @@ void tampilkanRespon(int httpCode, const String& responseBody) {
       }
     }
 
+    printLine();
+    if (status == "masuk")  buzzerMasuk();
+    else if (status == "keluar") buzzerKeluar();
+    else buzzerDitolak();
+
   } else {
     // Gagal / ditolak server
-    status.toUpperCase();
-    Serial.printf("  STATUS  : %s\n", status.c_str());
+    String statusUpper = status;
+    statusUpper.toUpperCase();
+    Serial.printf("  STATUS  : %s\n", statusUpper.c_str());
     Serial.printf("  PESAN   : %s\n", pesan.c_str());
     Serial.printf("  HTTP    : %d\n", httpCode);
+    printLine();
+    // sudah_lengkap / terlalu_cepat → ditolak; lainnya → error
+    if (status == "sudah_lengkap" || status == "terlalu_cepat") buzzerDitolak();
+    else buzzerError();
+    return;
   }
-
-  printLine();
 }
 
 // --- Kirim heartbeat ke server ---
@@ -153,7 +187,12 @@ void setup() {
   Serial.println("   SISTEM ABSENSI RFID + KAMERA");
   printLine();
 
-  // 1. Inisialisasi Bus SPI Kustom & RFID
+  // 1. Inisialisasi Buzzer
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+  beep(1, 80);   // beep singkat tanda sistem menyala
+
+  // 2. Inisialisasi Bus SPI Kustom & RFID
   SPI.begin(rfid_sck_pin, rfid_miso_pin, rfid_mosi_pin, rfid_ss_pin);
   rfid.PCD_Init();
   Serial.println("[OK] Modul RFID RC522 Siap.");
@@ -234,6 +273,7 @@ void loop() {
   camera_fb_t* fb = esp_camera_fb_get();
   if (!fb) {
     Serial.println("[ERROR] Gagal mengambil foto!");
+    buzzerError();
     rfid.PICC_HaltA();
     return;
   }
@@ -274,6 +314,7 @@ void loop() {
     Serial.println("  STATUS  : GAGAL KONEKSI");
     Serial.printf("  ERROR   : %s\n", http.errorToString(httpCode).c_str());
     printLine();
+    buzzerError();
   }
 
   http.end();
