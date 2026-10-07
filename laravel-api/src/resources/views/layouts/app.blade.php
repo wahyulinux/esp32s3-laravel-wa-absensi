@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — Sistem Absensi</title>
+    <title>@yield('title', 'Dashboard') — {{ $namaSekolah }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -46,7 +46,7 @@
                 </svg>
             </div>
             <div class="min-w-0">
-                <p class="text-white font-semibold text-sm leading-tight truncate">Sistem Absensi</p>
+                <p class="text-white font-semibold text-sm leading-tight truncate">{{ $namaSekolah }}</p>
                 <p class="text-slate-400 text-xs mt-0.5">ESP32-CAM · RFID</p>
             </div>
         </div>
@@ -123,6 +123,36 @@
             Data Siswa
         </a>
 
+        @php $isKelas = request()->routeIs('kelas.*'); @endphp
+        <a href="{{ route('kelas.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
+                  {{ $isKelas ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+            <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
+                         {{ $isKelas ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                    <rect x="13" y="3" width="8" height="8" rx="1.5"/>
+                    <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+                    <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+                </svg>
+            </span>
+            Kelas
+        </a>
+
+        @php $isJurusan = request()->routeIs('jurusan.*'); @endphp
+        <a href="{{ route('jurusan.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
+                  {{ $isJurusan ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+            <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
+                         {{ $isJurusan ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                    <path d="M11.7 2.805a.75.75 0 01.6 0A60.65 60.65 0 0122.83 8.72a.75.75 0 01-.231 1.337 49.948 49.948 0 00-9.902 3.912l-.003.002-.34.18a.75.75 0 01-.707 0A50.86 50.86 0 007.5 12.174v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 014.653-2.52.75.75 0 00-.65-1.352 56.123 56.123 0 00-4.78 2.589 1.858 1.858 0 00-.859 1.228 49.803 49.803 0 00-4.634-1.527.75.75 0 01-.231-1.337A60.653 60.653 0 0111.7 2.805z"/>
+                    <path d="M13.06 15.473a48.45 48.45 0 017.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 01-.46.71 47.87 47.87 0 00-8.105 4.342.75.75 0 01-.832 0 47.87 47.87 0 00-8.104-4.342.75.75 0 01-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 00-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.905.434 1.356.66a6.727 6.727 0 00.551-1.607 1.5 1.5 0 00.14-2.67v-.645a48.548 48.548 0 013.44 1.667 2.25 2.25 0 002.12 0z"/>
+                </svg>
+            </span>
+            Jurusan
+        </a>
+
         {{-- Section: Log --}}
         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Log</p>
 
@@ -137,6 +167,22 @@
                 </svg>
             </span>
             Log UID Kartu
+        </a>
+
+        {{-- Section: Sistem --}}
+        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Sistem</p>
+
+        @php $isPengaturan = request()->routeIs('pengaturan.*'); @endphp
+        <a href="{{ route('pengaturan.edit') }}"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
+                  {{ $isPengaturan ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+            <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
+                         {{ $isPengaturan ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd"/>
+                </svg>
+            </span>
+            Pengaturan
         </a>
 
     </nav>

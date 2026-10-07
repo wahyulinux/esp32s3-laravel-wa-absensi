@@ -13,11 +13,22 @@
         <h1 class="text-xl font-bold text-gray-900">Data Siswa</h1>
         <p class="text-sm text-gray-500 mt-0.5">Manajemen siswa dan kartu RFID</p>
     </div>
-    <a href="{{ route('siswa.create') }}"
-       class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Daftarkan Siswa
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('siswa.kartu-massal', request()->only('cari', 'kelas', 'jurusan_id')) }}" target="_blank"
+           class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9V3h12v6"/>
+                <path d="M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2"/>
+                <rect x="6" y="14" width="12" height="7"/>
+            </svg>
+            Cetak Kartu
+        </a>
+        <a href="{{ route('siswa.create') }}"
+           class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Daftarkan Siswa
+        </a>
+    </div>
 </div>
 
 {{-- Ringkasan per kelas --}}
@@ -50,8 +61,14 @@
             <option value="{{ $kelas }}" {{ request('kelas') === $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
             @endforeach
         </select>
+        <select name="jurusan_id" class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <option value="">Semua Jurusan</option>
+            @foreach($jurusanList as $j)
+            <option value="{{ $j->id }}" {{ (string) request('jurusan_id') === (string) $j->id ? 'selected' : '' }}>{{ $j->nama }}</option>
+            @endforeach
+        </select>
         <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors">Cari</button>
-        @if(request('cari') || request('kelas'))
+        @if(request('cari') || request('kelas') || request('jurusan_id'))
         <a href="{{ route('siswa.index') }}" class="px-4 py-2 border border-gray-200 text-gray-500 rounded-xl text-sm hover:bg-gray-50 transition-colors">Reset</a>
         @endif
     </form>
@@ -70,6 +87,7 @@
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide" colspan="2">Siswa</th>
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">NIS</th>
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Kelas</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Jurusan</th>
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">UID RFID</th>
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Status</th>
                 <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Aksi</th>
@@ -81,9 +99,13 @@
                 <td class="px-5 py-3.5 text-gray-300 text-xs tabular-nums">{{ $siswa->firstItem() + $i }}</td>
 
                 <td class="pl-4 pr-2 py-3.5 w-12">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
+                    <div class="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-white text-sm font-bold shadow-sm"
                          style="background: {{ avatarColor($s->nama) }}">
+                        @if($s->foto_url)
+                        <img src="{{ $s->foto_url }}" class="w-full h-full object-cover" alt="{{ $s->nama }}">
+                        @else
                         {{ avatarInitials($s->nama) }}
+                        @endif
                     </div>
                 </td>
 
@@ -94,6 +116,11 @@
                 <td class="px-4 py-3.5">
                     @if($s->kelas)
                     <span class="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-100">{{ $s->kelas }}</span>
+                    @else <span class="text-gray-300 text-xs">—</span> @endif
+                </td>
+                <td class="px-4 py-3.5">
+                    @if($s->jurusan)
+                    <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-semibold border border-indigo-100">{{ $s->jurusan->kode }}</span>
                     @else <span class="text-gray-300 text-xs">—</span> @endif
                 </td>
                 <td class="px-4 py-3.5">
@@ -112,6 +139,15 @@
                 </td>
                 <td class="px-4 py-3.5">
                     <div class="flex items-center gap-2">
+                        <a href="{{ route('siswa.kartu', $s) }}" target="_blank" title="Cetak Kartu RFID"
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                                <path d="M6 9V3h12v6"/>
+                                <path d="M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2"/>
+                                <rect x="6" y="14" width="12" height="7"/>
+                            </svg>
+                            Kartu
+                        </a>
                         <a href="{{ route('siswa.edit', $s) }}"
                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
@@ -134,7 +170,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="py-20 text-center">
+                <td colspan="9" class="py-20 text-center">
                     <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-gray-300">
                             <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>

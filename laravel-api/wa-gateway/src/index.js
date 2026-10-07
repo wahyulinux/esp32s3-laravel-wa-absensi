@@ -7,6 +7,8 @@ const {
 const express = require('express');
 const qrcode  = require('qrcode');
 const pino    = require('pino');
+const fs      = require('fs');
+const path    = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -18,6 +20,16 @@ let sock        = null;
 let qrDataUrl   = null;
 let isConnected = false;
 let isConnecting = false;
+
+// ── Session helpers ───────────────────────────────────────────────────────────
+function clearSession() {
+    const dir = '/app/session';
+    if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach(f => {
+            try { fs.rmSync(path.join(dir, f), { recursive: true, force: true }); } catch (_) {}
+        });
+    }
+}
 
 // ── WhatsApp connect ──────────────────────────────────────────────────────────
 async function connect() {
@@ -64,7 +76,9 @@ async function connect() {
                 setTimeout(connect, 5000);
             } else {
                 qrDataUrl = null;
-                console.log('[WA] Sesi dihapus (logged out). Hapus folder session lalu restart.');
+                console.log('[WA] Sesi tidak valid (logged out). Menghapus sesi dan membuat QR baru...');
+                clearSession();
+                setTimeout(connect, 2000);
             }
         }
     });
@@ -185,15 +199,7 @@ app.post('/logout', async (req, res) => {
     qrDataUrl    = null;
     sock         = null;
 
-    // Hapus file sesi
-    const fs   = require('fs');
-    const path = require('path');
-    const dir  = '/app/session';
-    if (fs.existsSync(dir)) {
-        fs.readdirSync(dir).forEach(f => {
-            try { fs.rmSync(path.join(dir, f), { recursive: true, force: true }); } catch (_) {}
-        });
-    }
+    clearSession();
 
     console.log('[WA] Logout — sesi dihapus');
     res.json({ success: true, message: 'Berhasil logout dari WhatsApp' });

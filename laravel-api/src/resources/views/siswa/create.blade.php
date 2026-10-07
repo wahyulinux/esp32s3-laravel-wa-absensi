@@ -22,8 +22,10 @@
             <p class="text-sm font-semibold text-gray-700">Informasi Siswa</p>
         </div>
         <div class="p-6">
-        <form method="POST" action="{{ route('siswa.store') }}" class="space-y-5">
+        <form method="POST" action="{{ route('siswa.store') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
+
+            @include('siswa.partials.foto-input', ['allowHapus' => false])
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -69,16 +71,44 @@
                 @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kelas <span class="text-gray-400 font-normal">(opsional)</span></label>
-                <input type="text" name="kelas" value="{{ old('kelas') }}"
-                       placeholder="Contoh: 10A, XI IPA 2, XII TKJ 1"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                              @error('kelas') border-red-400 bg-red-50 @enderror">
-                @error('kelas')
-                <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
-                @enderror
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kelas <span class="text-gray-400 font-normal">(opsional)</span></label>
+                    <select name="kelas_id"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
+                                   @error('kelas_id') border-red-400 bg-red-50 @enderror">
+                        <option value="">— Pilih Kelas —</option>
+                        @foreach($kelasMasterList as $k)
+                        <option value="{{ $k->id }}" {{ (string) old('kelas_id') === (string) $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                        @endforeach
+                    </select>
+                    @error('kelas_id')
+                    <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                    @enderror
+                    @if($kelasMasterList->isEmpty())
+                    <p class="text-amber-600 text-xs mt-1.5">Belum ada kelas. <a href="{{ route('kelas.create') }}" class="underline font-medium">Tambah kelas</a> dulu.</p>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Jurusan <span class="text-gray-400 font-normal">(opsional)</span></label>
+                    <select name="jurusan_id"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
+                                   @error('jurusan_id') border-red-400 bg-red-50 @enderror">
+                        <option value="">— Pilih Jurusan —</option>
+                        @foreach($jurusanList as $j)
+                        <option value="{{ $j->id }}" {{ (string) old('jurusan_id') === (string) $j->id ? 'selected' : '' }}>{{ $j->nama }} ({{ $j->kode }})</option>
+                        @endforeach
+                    </select>
+                    @error('jurusan_id')
+                    <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                    @enderror
+                    @if($jurusanList->isEmpty())
+                    <p class="text-amber-600 text-xs mt-1.5">Belum ada jurusan. <a href="{{ route('jurusan.create') }}" class="underline font-medium">Tambah jurusan</a> dulu.</p>
+                    @endif
+                </div>
             </div>
 
             <div>

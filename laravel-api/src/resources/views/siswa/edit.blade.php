@@ -13,9 +13,13 @@
 
     {{-- Page Header --}}
     <div class="mb-6 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-md"
+        <div class="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center text-white text-lg font-bold shadow-md shrink-0"
              style="background: {{ avatarColor($siswa->nama) }}">
+            @if($siswa->foto_url)
+            <img src="{{ $siswa->foto_url }}" class="w-full h-full object-cover" alt="{{ $siswa->nama }}">
+            @else
             {{ avatarInitials($siswa->nama) }}
+            @endif
         </div>
         <div>
             <h1 class="text-xl font-bold text-gray-900">{{ $siswa->nama }}</h1>
@@ -28,8 +32,10 @@
             <p class="text-sm font-semibold text-gray-700">Edit Informasi Siswa</p>
         </div>
         <div class="p-6">
-        <form method="POST" action="{{ route('siswa.update', $siswa) }}" class="space-y-5">
+        <form method="POST" action="{{ route('siswa.update', $siswa) }}" enctype="multipart/form-data" class="space-y-5">
             @csrf @method('PUT')
+
+            @include('siswa.partials.foto-input', ['fotoUrlAwal' => $siswa->foto_url, 'allowHapus' => true])
 
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">UID Kartu RFID</label>
@@ -58,13 +64,37 @@
                 @error('nama') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kelas</label>
-                <input type="text" name="kelas" value="{{ old('kelas', $siswa->kelas) }}"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow
-                              @error('kelas') border-red-400 bg-red-50 @enderror">
-                @error('kelas') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kelas</label>
+                    <select name="kelas_id"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow
+                                   @error('kelas_id') border-red-400 bg-red-50 @enderror">
+                        <option value="">— Pilih Kelas —</option>
+                        @foreach($kelasMasterList as $k)
+                        <option value="{{ $k->id }}" {{ (string) old('kelas_id', $siswa->kelas_id) === (string) $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                        @endforeach
+                    </select>
+                    @error('kelas_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                    @if($siswa->kelas && !$siswa->kelas_id)
+                    <p class="text-amber-600 text-xs mt-1.5">Kelas lama "{{ $siswa->kelas }}" belum terhubung ke master kelas. Pilih kelas di atas untuk menghubungkan.</p>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Jurusan</label>
+                    <select name="jurusan_id"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow
+                                   @error('jurusan_id') border-red-400 bg-red-50 @enderror">
+                        <option value="">— Pilih Jurusan —</option>
+                        @foreach($jurusanList as $j)
+                        <option value="{{ $j->id }}" {{ (string) old('jurusan_id', $siswa->jurusan_id) === (string) $j->id ? 'selected' : '' }}>{{ $j->nama }} ({{ $j->kode }})</option>
+                        @endforeach
+                    </select>
+                    @error('jurusan_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div>
