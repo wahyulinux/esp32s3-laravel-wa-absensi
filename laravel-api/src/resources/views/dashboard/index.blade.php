@@ -146,7 +146,7 @@
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-gray-900 text-sm">Aktivitas Hari Ini</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Refresh otomatis setiap 15 detik</p>
+                <p class="text-xs text-gray-400 mt-0.5">Refresh otomatis setiap 5 detik</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="flex items-center gap-1.5 text-xs text-gray-400" id="last-update-wrap">
@@ -239,13 +239,18 @@
 
 @push('scripts')
 <script>
-let lastCount = {{ $absensiTerbaru->count() }};
+let lastHadir  = {{ $hadirHariIni }};
+let lastPulang = {{ $sudahPulang }};
 
 async function pollStats() {
     try {
-        const r = await fetch('{{ route("dashboard.stats") }}', { headers: { 'Accept': 'application/json' } });
-        if (!r.ok) return;
-        const d = await r.json();
+        const [r, feedResp] = await Promise.all([
+            fetch('{{ route("dashboard.stats") }}', { headers: { 'Accept': 'application/json' } }),
+            fetch('{{ route("dashboard.feed") }}',  { headers: { 'Accept': 'application/json' } }),
+        ]);
+        if (!r.ok || !feedResp.ok) return;
+        const d    = await r.json();
+        const feed = await feedResp.json();
 
         document.getElementById('stat-hadir').textContent      = d.hadir;
         document.getElementById('stat-pulang').textContent     = d.pulang;
@@ -257,17 +262,50 @@ async function pollStats() {
         document.getElementById('bar-pulang').style.width      = d.pct_pulang + '%';
         document.getElementById('bar-belum').style.width       = d.pct_belum  + '%';
 
-        if (d.hadir !== lastCount) {
-            lastCount = d.hadir;
-            showToast('info', 'Scan baru terdeteksi');
-            const feedResp = await fetch('{{ route("dashboard.feed") }}', { headers: { 'Accept': 'application/json' } });
-            const feed = await feedResp.json();
-            renderFeed(feed);
-        }
+        renderFeed(feed);
+        renderKelas(d.per_kelas);
+
+        const masukBaru  = d.hadir  - lastHadir;
+        const pulangBaru = d.pulang - lastPulang;
+        if (masukBaru > 0)  showToast('info', `${masukBaru} scan masuk baru`);
+        if (pulangBaru > 0) showToast('info', `${pulangBaru} scan pulang baru`);
+        lastHadir  = d.hadir;
+        lastPulang = d.pulang;
 
         const now = new Date();
         document.getElementById('last-update').textContent = 'Update ' + now.toTimeString().slice(0,5);
     } catch(e) {}
+}
+
+function renderKelas(items) {
+    const el = document.getElementById('kelas-list');
+    if (!items.length) {
+        el.innerHTML = `<div class="py-8 text-center"><p class="text-sm text-gray-400">Belum ada data kelas</p></div>`;
+        return;
+    }
+    const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    el.innerHTML = items.map(k => {
+        const pct  = k.total > 0 ? Math.round(k.hadir / k.total * 100) : 0;
+        const dot  = pct >= 80 ? 'bg-emerald-400' : (pct >= 50 ? 'bg-amber-400' : 'bg-red-400');
+        const text = pct >= 80 ? 'text-emerald-600' : (pct >= 50 ? 'text-amber-500' : 'text-red-500');
+        const bar  = pct >= 80 ? 'bg-emerald-500' : (pct >= 50 ? 'bg-amber-400' : 'bg-red-400');
+        return `
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${dot}"></span>
+                    <span class="text-sm font-semibold text-gray-700">${esc(k.kelas)}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs text-gray-400">${k.hadir}/${k.total}</span>
+                    <span class="text-sm font-bold ${text}">${pct}%</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="h-2 rounded-full transition-all duration-500 ${bar}" style="width:${pct}%"></div>
+            </div>
+        </div>`;
+    }).join('');
 }
 
 function renderFeed(items) {
@@ -303,7 +341,7 @@ function renderFeed(items) {
     `).join('');
 }
 
-setInterval(pollStats, 15000);
+setInterval(pollStats, 5000);
 
 // Device monitoring
 async function pollDevices() {

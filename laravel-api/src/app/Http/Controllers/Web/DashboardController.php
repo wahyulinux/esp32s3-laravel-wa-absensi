@@ -20,14 +20,7 @@ class DashboardController extends Controller
         $belumPulang    = $hadirHariIni - $sudahPulang;
         $absensiTerbaru = Absensi::with('siswa')->whereDate('tanggal', today())->latest('waktu_masuk')->limit(10)->get();
 
-        $semuaKelas = Siswa::where('aktif', true)->whereNotNull('kelas')->distinct()->orderBy('kelas')->pluck('kelas');
-        $perKelas   = [];
-        foreach ($semuaKelas as $kelas) {
-            $total  = Siswa::where('aktif', true)->where('kelas', $kelas)->count();
-            $hadir  = Absensi::whereDate('tanggal', today())
-                ->whereHas('siswa', fn ($q) => $q->where('kelas', $kelas))->count();
-            $perKelas[$kelas] = compact('total', 'hadir');
-        }
+        $perKelas       = $this->perKelas();
 
         $devices = Device::orderBy('device_id')->get();
 
@@ -51,7 +44,32 @@ class DashboardController extends Controller
             'pct_hadir'  => $total  > 0 ? round($hadir  / $total  * 100) : 0,
             'pct_pulang' => $hadir  > 0 ? round($pulang / $hadir  * 100) : 0,
             'pct_belum'  => $hadir  > 0 ? round($belum  / $hadir  * 100) : 0,
+            'per_kelas'  => collect($this->perKelas())
+                ->map(fn (array $d, string $kelas) => ['kelas' => $kelas] + $d)
+                ->values(),
         ]);
+    }
+
+    /** @return array<string, array{total: int, hadir: int}> */
+    private function perKelas(): array
+    {
+        $totalPerKelas = Siswa::where('aktif', true)->whereNotNull('kelas')
+            ->selectRaw('kelas, COUNT(*) AS total')
+            ->groupBy('kelas')->orderBy('kelas')
+            ->pluck('total', 'kelas');
+
+        $hadirPerKelas = Absensi::join('siswa', 'siswa.id', '=', 'absensi.siswa_id')
+            ->whereDate('absensi.tanggal', today())
+            ->selectRaw('siswa.kelas, COUNT(*) AS hadir')
+            ->groupBy('siswa.kelas')
+            ->pluck('hadir', 'kelas');
+
+        $perKelas = [];
+        foreach ($totalPerKelas as $kelas => $total) {
+            $perKelas[$kelas] = ['total' => (int) $total, 'hadir' => (int) ($hadirPerKelas[$kelas] ?? 0)];
+        }
+
+        return $perKelas;
     }
 
     public function devices(): JsonResponse
