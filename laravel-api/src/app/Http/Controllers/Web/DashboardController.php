@@ -12,13 +12,15 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    private const FEED_LIMIT = 25;
+
     public function index(): View
     {
         $totalSiswa     = Siswa::where('aktif', true)->count();
         $hadirHariIni   = Absensi::whereDate('tanggal', today())->count();
         $sudahPulang    = Absensi::whereDate('tanggal', today())->whereNotNull('waktu_keluar')->count();
         $belumPulang    = $hadirHariIni - $sudahPulang;
-        $absensiTerbaru = Absensi::with('siswa')->whereDate('tanggal', today())->latest('waktu_masuk')->limit(10)->get();
+        $absensiTerbaru = Absensi::with('siswa')->whereDate('tanggal', today())->latest('waktu_masuk')->limit(self::FEED_LIMIT)->get();
 
         $perKelas       = $this->perKelas();
 
@@ -87,7 +89,7 @@ class DashboardController extends Controller
 
     public function feed(): JsonResponse
     {
-        $items = Absensi::with('siswa')->whereDate('tanggal', today())->latest('waktu_masuk')->limit(10)->get();
+        $items = Absensi::with('siswa')->whereDate('tanggal', today())->latest('waktu_masuk')->limit(self::FEED_LIMIT)->get();
 
         return response()->json($items->map(fn (Absensi $a) => [
             'nama'         => $a->siswa->nama,
