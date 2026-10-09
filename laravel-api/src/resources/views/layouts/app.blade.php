@@ -107,6 +107,7 @@
             Rekap
         </a>
 
+        @auth
         {{-- Section: Master Data --}}
         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Master Data</p>
 
@@ -169,6 +170,9 @@
             Log UID Kartu
         </a>
 
+        @endauth
+
+        @admin
         {{-- Section: Sistem --}}
         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Sistem</p>
 
@@ -185,11 +189,26 @@
             Pengaturan
         </a>
 
+        @php $isPengguna = request()->routeIs('pengguna.*'); @endphp
+        <a href="{{ route('pengguna.index') }}"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
+                  {{ $isPengguna ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+            <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
+                         {{ $isPengguna ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                    <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/>
+                </svg>
+            </span>
+            Pengguna
+        </a>
+        @endadmin
+
     </nav>
 
     {{-- Footer --}}
     <div class="px-3 py-4 border-t border-slate-700/50 space-y-2">
 
+        @admin
         {{-- WA Gateway Status --}}
         <div class="flex items-center gap-2">
             <a href="http://{{ request()->getHost() }}:3001" target="_blank" id="wa-status-card"
@@ -217,6 +236,7 @@
                 </svg>
             </button>
         </div>
+        @endadmin
 
         {{-- Server Aktif --}}
         <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800/60">
@@ -261,6 +281,29 @@
                 <div class="hidden md:flex items-center gap-1.5 text-xs text-gray-400">
                     <span>{{ now()->translatedFormat('d F Y') }}</span>
                 </div>
+
+                @auth
+                <div class="flex items-center gap-2 pl-2 ml-1 border-l border-gray-200">
+                    <div class="hidden sm:block text-right leading-tight">
+                        <p class="text-xs font-semibold text-gray-700 truncate max-w-[10rem]">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-gray-400">{{ auth()->user()->roleLabel() }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" title="Logout"
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clip-rule="evenodd"/></svg>
+                            <span class="hidden sm:inline">Logout</span>
+                        </button>
+                    </form>
+                </div>
+                @else
+                <a href="{{ route('login') }}"
+                   class="flex items-center gap-1.5 px-3 py-1.5 ml-1 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+                    Login
+                </a>
+                @endauth
             </div>
         </div>
     </header>
@@ -320,6 +363,7 @@ function showToast(type, msg, duration = 4000) {
 // Expose globally for AJAX use
 window.showToast = showToast;
 
+@admin
 // WA Gateway status polling
 (function () {
     const dot        = document.getElementById('wa-dot');
@@ -383,6 +427,7 @@ async function waDisconnect() {
         btn.classList.remove('opacity-50');
     }
 }
+@endadmin
 </script>
 @stack('scripts')
 </body>

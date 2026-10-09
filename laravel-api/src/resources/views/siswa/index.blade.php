@@ -156,7 +156,7 @@
                             </svg>
                             Edit
                         </a>
-                        @if($s->aktif)
+                        @if($s->aktif && auth()->user()->isAdmin())
                         <button onclick="confirmDeactivate({{ $s->id }}, '{{ addslashes($s->nama) }}')"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors border border-red-100">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
