@@ -24,8 +24,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::if('admin', fn () => (bool) auth()->user()?->isAdmin());
 
-        View::composer('layouts.app', function ($view) {
-            $view->with('namaSekolah', Setting::get('nama_sekolah', 'Sistem Absensi'));
+        View::composer('*', function ($view) {
+            try {
+                $view->with('namaSekolah', Setting::get('nama_sekolah', 'Sistem Absensi'));
+            } catch (\Throwable) {
+                $view->with('namaSekolah', 'Sistem Absensi');
+            }
         });
     }
 }
