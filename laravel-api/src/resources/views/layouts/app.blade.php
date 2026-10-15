@@ -5,14 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — {{ $namaSekolah }}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    {{-- School Identity Favicon --}}
+    <link rel="icon" href="{{ asset('images/logo-sekolah.png') }}" type="image/png">
+    
+    {{-- FontAwesome 6 --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    {{-- Tailwind CSS CDN & Custom Config --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: { 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a5f', 900:'#1e3050' }
+                        primary: {
+                            DEFAULT: '#FF8533',
+                            50: '#FFF7ED',
+                            100: '#FFEDD5',
+                            200: '#FED7AA',
+                            300: '#FDBA74',
+                            400: '#FB923C',
+                            500: '#FF8533',
+                            600: '#EA6D1A',
+                            700: '#C85207',
+                            800: '#9E3E04',
+                            900: '#7B3105',
+                        },
+                        secondary: {
+                            DEFAULT: '#5C2828',
+                            50: '#FBF5F5',
+                            100: '#F5E6E6',
+                            200: '#E6C6C6',
+                            300: '#D29E9E',
+                            400: '#B87272',
+                            500: '#8A4545',
+                            600: '#6F3131',
+                            700: '#5C2828',
+                            800: '#471E1E',
+                            900: '#341515',
+                        },
+                        accent: {
+                            DEFAULT: '#2E5A27',
+                            50: '#F2F8F1',
+                            100: '#E1EFE0',
+                            200: '#C1DFC0',
+                            300: '#97C895',
+                            400: '#64A961',
+                            500: '#2E5A27',
+                            600: '#254A20',
+                            700: '#1D3B19',
+                            800: '#152C13',
+                            900: '#0E1E0D',
+                        },
+                        canvas: '#F4F6F8',
+                        darktext: '#1E1E1E',
                     }
                 }
             }
@@ -21,300 +67,318 @@
     <style>
         #sidebar { transition: transform .25s cubic-bezier(.4,0,.2,1); }
         @media(max-width:1023px) { #sidebar { transform: translateX(-100%); } #sidebar.open { transform: translateX(0); } }
-        .toast { animation: slideIn .3s ease; }
+        .toast { animation: slideIn .3s cubic-bezier(.16,1,.3,1); }
         @keyframes slideIn { from { opacity:0; transform:translateX(2rem); } to { opacity:1; transform:translateX(0); } }
         .sort-link { display:inline-flex; align-items:center; gap:.25rem; cursor:pointer; user-select:none; }
-        .sort-link:hover, th.sortable:hover { color:#2563eb; }
+        .sort-link:hover, th.sortable:hover { color:#FF8533; }
+        
+        /* Modern scrollbar for sidebar */
+        #sidebar-nav::-webkit-scrollbar { width: 5px; }
+        #sidebar-nav::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        #sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        #sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
     </style>
     @stack('styles')
 </head>
-<body class="bg-slate-50 min-h-screen" x-data="{ sidebarOpen: false }">
+<body class="bg-[#F4F6F8] text-[#1E1E1E] min-h-screen font-sans antialiased" x-data="{ sidebarOpen: false }">
 
 {{-- Overlay mobile --}}
-<div id="overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden" onclick="toggleSidebar()"></div>
+<div id="overlay" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-{{-- ── Sidebar ── --}}
-<aside id="sidebar" class="w-64 min-h-screen bg-slate-900 flex flex-col fixed top-0 left-0 z-30 shadow-2xl border-r border-slate-700/40">
+{{-- ── Sidebar: Merah Kecokelatan (#5C2828) ── --}}
+<aside id="sidebar" class="w-64 min-h-screen bg-[#5C2828] flex flex-col fixed top-0 left-0 z-40 shadow-2xl border-r border-[#471E1E]">
 
-    {{-- Header --}}
-    <div class="px-5 py-5 border-b border-slate-700/50 flex items-center justify-between gap-2">
+    {{-- Sidebar Brand Header --}}
+    <div class="px-5 py-5 border-b border-white/10 flex items-center justify-between gap-2">
         <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-5 h-5">
-                    <path fill-rule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0118 9.375v9.375a3 3 0 003-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 00-.673-.05A3 3 0 0015 1.5h-1.5a3 3 0 00-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6zM13.5 3A1.5 1.5 0 0012 4.5h4.5A1.5 1.5 0 0015 3h-1.5z" clip-rule="evenodd"/>
-                    <path fill-rule="evenodd" d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V9.375zM6 12a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V12zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V15zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6 18a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V18zm2.25 0a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
-                </svg>
+            <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-md shadow-black/20 shrink-0 overflow-hidden border border-white/20">
+                <img src="{{ asset('images/logo-sekolah.png') }}" alt="{{ $namaSekolah }}" class="w-full h-full object-contain">
             </div>
             <div class="min-w-0">
-                <p class="text-white font-semibold text-sm leading-tight truncate">{{ $namaSekolah }}</p>
-                <p class="text-slate-400 text-xs mt-0.5">ESP32-CAM · RFID</p>
+                <p class="text-white font-bold text-sm leading-tight truncate tracking-tight">{{ $namaSekolah }}</p>
+                <p class="text-rose-200/70 text-xs mt-0.5 flex items-center gap-1.5 font-medium">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-[#FF8533]"></span>
+                    ESP32-CAM · RFID
+                </p>
             </div>
         </div>
-        <button onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd"/>
-            </svg>
+        <button onclick="toggleSidebar()" class="lg:hidden text-rose-200/70 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10">
+            <i class="fa-solid fa-xmark text-lg"></i>
         </button>
     </div>
 
-    {{-- Nav --}}
-    <nav class="flex-1 px-3 py-4 overflow-y-auto">
+    {{-- Sidebar Nav --}}
+    <nav id="sidebar-nav" class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
 
         {{-- Section: Utama --}}
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-1 select-none">Utama</p>
+        <p class="text-rose-200/50 text-[10px] font-bold uppercase tracking-widest px-3 mb-2 mt-1 select-none flex items-center gap-1.5">
+            <i class="fa-solid fa-house-chimney text-[9px] opacity-70"></i>
+            <span>Menu Utama</span>
+        </p>
 
         @php $isDash = request()->routeIs('dashboard'); @endphp
         <a href="{{ route('dashboard') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isDash ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isDash ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isDash ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75z"/>
-                </svg>
+                         {{ $isDash ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-chart-pie text-sm"></i>
             </span>
-            Dashboard
+            <span>Dashboard</span>
         </a>
 
         {{-- Section: Absensi --}}
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Absensi</p>
+        <p class="text-rose-200/50 text-[10px] font-bold uppercase tracking-widest px-3 mb-2 mt-6 select-none flex items-center gap-1.5">
+            <i class="fa-solid fa-clipboard-user text-[9px] opacity-70"></i>
+            <span>Absensi Siswa</span>
+        </p>
 
         @php $isHariIni = request()->routeIs('absensi.hari-ini'); @endphp
         <a href="{{ route('absensi.hari-ini') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isHariIni ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isHariIni ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isHariIni ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
-                    <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd"/>
-                </svg>
+                         {{ $isHariIni ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-calendar-check text-sm"></i>
             </span>
-            Hari Ini
+            <span>Hari Ini</span>
         </a>
 
         @php $isRekap = request()->routeIs('absensi.rekap'); @endphp
         <a href="{{ route('absensi.rekap') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isRekap ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isRekap ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isRekap ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z" clip-rule="evenodd"/>
-                    <path fill-rule="evenodd" d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z" clip-rule="evenodd"/>
-                </svg>
+                         {{ $isRekap ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-clipboard-list text-sm"></i>
             </span>
-            Rekap
+            <span>Rekap Kehadiran</span>
         </a>
 
         @auth
         {{-- Section: Master Data --}}
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Master Data</p>
+        <p class="text-rose-200/50 text-[10px] font-bold uppercase tracking-widest px-3 mb-2 mt-6 select-none flex items-center gap-1.5">
+            <i class="fa-solid fa-database text-[9px] opacity-70"></i>
+            <span>Master Data</span>
+        </p>
 
         @php $isSiswa = request()->routeIs('siswa.*'); @endphp
         <a href="{{ route('siswa.index') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isSiswa ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isSiswa ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isSiswa ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>
-                </svg>
+                         {{ $isSiswa ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-user-graduate text-sm"></i>
             </span>
-            Data Siswa
+            <span>Data Siswa</span>
         </a>
 
         @php $isKelas = request()->routeIs('kelas.*'); @endphp
         <a href="{{ route('kelas.index') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isKelas ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isKelas ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isKelas ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-                    <rect x="13" y="3" width="8" height="8" rx="1.5"/>
-                    <rect x="3" y="13" width="8" height="8" rx="1.5"/>
-                    <rect x="13" y="13" width="8" height="8" rx="1.5"/>
-                </svg>
+                         {{ $isKelas ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-chalkboard-user text-sm"></i>
             </span>
-            Kelas
+            <span>Kelas</span>
         </a>
 
         @php $isJurusan = request()->routeIs('jurusan.*'); @endphp
         <a href="{{ route('jurusan.index') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isJurusan ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isJurusan ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isJurusan ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path d="M11.7 2.805a.75.75 0 01.6 0A60.65 60.65 0 0122.83 8.72a.75.75 0 01-.231 1.337 49.948 49.948 0 00-9.902 3.912l-.003.002-.34.18a.75.75 0 01-.707 0A50.86 50.86 0 007.5 12.174v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 014.653-2.52.75.75 0 00-.65-1.352 56.123 56.123 0 00-4.78 2.589 1.858 1.858 0 00-.859 1.228 49.803 49.803 0 00-4.634-1.527.75.75 0 01-.231-1.337A60.653 60.653 0 0111.7 2.805z"/>
-                    <path d="M13.06 15.473a48.45 48.45 0 017.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 01-.46.71 47.87 47.87 0 00-8.105 4.342.75.75 0 01-.832 0 47.87 47.87 0 00-8.104-4.342.75.75 0 01-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 00-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.905.434 1.356.66a6.727 6.727 0 00.551-1.607 1.5 1.5 0 00.14-2.67v-.645a48.548 48.548 0 013.44 1.667 2.25 2.25 0 002.12 0z"/>
-                </svg>
+                         {{ $isJurusan ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-layer-group text-sm"></i>
             </span>
-            Jurusan
+            <span>Jurusan</span>
         </a>
 
         {{-- Section: Log --}}
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Log</p>
+        <p class="text-rose-200/50 text-[10px] font-bold uppercase tracking-widest px-3 mb-2 mt-6 select-none flex items-center gap-1.5">
+            <i class="fa-solid fa-clock-rotate-left text-[9px] opacity-70"></i>
+            <span>Log Sistem</span>
+        </p>
 
         @php $isRfidLog = request()->routeIs('rfid-log.*'); @endphp
         <a href="{{ route('rfid-log.index') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isRfidLog ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isRfidLog ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isRfidLog ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M2.25 6a3 3 0 013-3h13.5a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3V6zm3.97.97a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 01-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 010-1.06zm4.28 4.28a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd"/>
-                </svg>
+                         {{ $isRfidLog ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-id-card text-sm"></i>
             </span>
-            Log UID Kartu
+            <span>Log UID Kartu</span>
         </a>
-
         @endauth
 
         @admin
         {{-- Section: Sistem --}}
-        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5 mt-5 select-none">Sistem</p>
+        <p class="text-rose-200/50 text-[10px] font-bold uppercase tracking-widest px-3 mb-2 mt-6 select-none flex items-center gap-1.5">
+            <i class="fa-solid fa-gear text-[9px] opacity-70"></i>
+            <span>Pengaturan</span>
+        </p>
 
         @php $isPengaturan = request()->routeIs('pengaturan.*'); @endphp
         <a href="{{ route('pengaturan.edit') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isPengaturan ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isPengaturan ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isPengaturan ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd"/>
-                </svg>
+                         {{ $isPengaturan ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-sliders text-sm"></i>
             </span>
-            Pengaturan
+            <span>Pengaturan Web</span>
         </a>
 
         @php $isPengguna = request()->routeIs('pengguna.*'); @endphp
         <a href="{{ route('pengguna.index') }}"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-colors group
-                  {{ $isPengguna ? 'bg-blue-500/15 text-blue-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                  {{ $isPengguna ? 'bg-[#FF8533] text-white font-semibold shadow-md shadow-black/20' : 'text-rose-100/80 hover:bg-white/10 hover:text-white' }}">
             <span class="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-colors
-                         {{ $isPengguna ? 'bg-blue-500/25 text-blue-300' : 'bg-white/5 text-slate-500 group-hover:bg-white/10 group-hover:text-slate-300' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/>
-                </svg>
+                         {{ $isPengguna ? 'bg-white/20 text-white' : 'bg-white/5 text-rose-200/70 group-hover:bg-white/15 group-hover:text-white' }}">
+                <i class="fa-solid fa-user-shield text-sm"></i>
             </span>
-            Pengguna
+            <span>Kelola Pengguna</span>
         </a>
         @endadmin
 
     </nav>
 
-    {{-- Footer --}}
-    <div class="px-3 py-4 border-t border-slate-700/50 space-y-2">
+    {{-- Sidebar Footer Widgets --}}
+    <div class="px-3 py-3.5 border-t border-white/10 space-y-2 bg-[#471E1E]/40">
 
         @admin
         {{-- WA Gateway Status --}}
         <div class="flex items-center gap-2">
             <a href="http://{{ request()->getHost() }}:3001" target="_blank" id="wa-status-card"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors cursor-pointer group flex-1 min-w-0">
-                <div class="relative shrink-0">
-                    <span id="wa-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600 block"></span>
+               class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group flex-1 min-w-0 border border-white/5">
+                <div class="relative shrink-0 flex items-center justify-center">
+                    <span id="wa-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 block"></span>
                     <span id="wa-dot-ping" class="w-2.5 h-2.5 rounded-full block absolute inset-0 opacity-0"></span>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p id="wa-label" class="text-slate-400 text-xs font-medium leading-tight">WhatsApp</p>
-                    <p id="wa-sub" class="text-slate-600 text-[10px] mt-0.5 truncate">Memeriksa...</p>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-brands fa-whatsapp text-emerald-400 text-xs"></i>
+                        <p id="wa-label" class="text-rose-100 text-xs font-semibold leading-tight truncate">WhatsApp</p>
+                    </div>
+                    <p id="wa-sub" class="text-rose-200/60 text-[10px] mt-0.5 truncate">Memeriksa...</p>
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                     class="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 shrink-0 transition-colors">
-                    <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd"/>
-                </svg>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-rose-200/40 group-hover:text-white shrink-0 transition-colors"></i>
             </a>
-            {{-- Disconnect button — shown via JS when connected --}}
+            {{-- Disconnect button --}}
             <button id="wa-disconnect-btn"
                     onclick="waDisconnect()"
                     title="Putuskan WhatsApp"
-                    class="hidden w-9 h-9 shrink-0 flex items-center justify-center rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                    <path fill-rule="evenodd" d="M12 2.25a.75.75 0 01.75.75v9a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM6.166 5.106a.75.75 0 010 1.06 8.25 8.25 0 1011.668 0 .75.75 0 111.06-1.06c3.808 3.807 3.808 9.98 0 13.788-3.807 3.808-9.98 3.808-13.788 0-3.808-3.807-3.808-9.98 0-13.788a.75.75 0 011.06 0z" clip-rule="evenodd"/>
-                </svg>
+                    class="hidden w-8 h-8 shrink-0 flex items-center justify-center rounded-xl bg-red-500/20 hover:bg-red-500/35 text-red-300 hover:text-white transition-colors border border-red-500/30">
+                <i class="fa-solid fa-power-off text-xs"></i>
             </button>
         </div>
         @endadmin
 
-        {{-- Server Aktif --}}
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800/60">
-            <div class="relative shrink-0">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 block"></span>
+        {{-- Server Aktif (Accent Forest Green Indicator #2E5A27) --}}
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5 border border-white/5">
+            <div class="relative shrink-0 flex items-center justify-center">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#2E5A27] block"></span>
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 block absolute inset-0 animate-ping opacity-60"></span>
             </div>
-            <div class="min-w-0">
-                <p class="text-slate-200 text-xs font-medium leading-tight">Server Aktif</p>
-                <p class="text-slate-500 text-[10px] mt-0.5 truncate">FrankenPHP · PostgreSQL</p>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-server text-rose-200/60 text-xs"></i>
+                    <p class="text-rose-100 text-xs font-semibold leading-tight">Server Aktif</p>
+                </div>
+                <p class="text-rose-200/60 text-[10px] mt-0.5 truncate">FrankenPHP · PostgreSQL</p>
             </div>
         </div>
     </div>
 </aside>
 
-{{-- ── Main ── --}}
+{{-- ── Main Content Area ── --}}
 <div class="lg:ml-64 flex flex-col min-h-screen">
 
-    {{-- Topbar --}}
-    <header class="bg-white/80 backdrop-blur-sm border-b border-gray-200/80 sticky top-0 z-10">
-        <div class="px-4 lg:px-6 py-3 flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
+    {{-- Topbar: Putih Bersih (#FFFFFF) dengan aksen garis Oranye Terang (#FF8533) di bawah --}}
+    <header class="bg-white border-b-2 border-[#FF8533] shadow-xs sticky top-0 z-20">
+        <div class="px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+            
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-gray-600 hover:bg-gray-100 hover:text-[#5C2828] transition-colors">
+                    <i class="fa-solid fa-bars text-base"></i>
+                </button>
 
-            {{-- Breadcrumb --}}
-            <nav class="flex items-center gap-1.5 text-sm flex-1 min-w-0">
-                <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-blue-600 transition-colors shrink-0 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd"/></svg>
-                </a>
-                @hasSection('breadcrumb')
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-gray-300 shrink-0"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
-                    @yield('breadcrumb')
-                @endif
-            </nav>
+                {{-- Breadcrumb --}}
+                <nav class="flex items-center gap-1.5 text-sm min-w-0">
+                    <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-[#FF8533] transition-colors shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-house text-xs"></i>
+                    </a>
+                    @hasSection('breadcrumb')
+                        <i class="fa-solid fa-chevron-right text-[10px] text-gray-300 shrink-0"></i>
+                        @yield('breadcrumb')
+                    @endif
+                </nav>
+            </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <div class="hidden sm:flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-gray-400"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd"/></svg>
-                    <span id="clock" class="text-xs font-mono text-gray-600 tabular-nums">{{ now()->format('H:i:s') }}</span>
+            {{-- Right info: Clock, Date, User & Actions --}}
+            <div class="flex items-center gap-2.5 shrink-0">
+                {{-- Clock --}}
+                <div class="hidden sm:flex items-center gap-2 bg-[#F4F6F8] border border-gray-200/80 rounded-xl px-3 py-1.5 shadow-2xs">
+                    <i class="fa-regular fa-clock text-[#FF8533] text-xs"></i>
+                    <span id="clock" class="text-xs font-mono font-semibold text-[#1E1E1E] tabular-nums">{{ now()->format('H:i:s') }}</span>
                 </div>
-                <div class="hidden md:flex items-center gap-1.5 text-xs text-gray-400">
+
+                {{-- Date --}}
+                <div class="hidden md:flex items-center gap-1.5 text-xs text-gray-500 font-medium px-2 py-1.5">
+                    <i class="fa-regular fa-calendar-days text-gray-400 text-xs"></i>
                     <span>{{ now()->translatedFormat('d F Y') }}</span>
                 </div>
 
                 @auth
                 <div class="flex items-center gap-2 pl-2 ml-1 border-l border-gray-200">
-                    <div class="hidden sm:block text-right leading-tight">
-                        <p class="text-xs font-semibold text-gray-700 truncate max-w-[10rem]">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-gray-400">{{ auth()->user()->roleLabel() }}</p>
+                    <div class="hidden sm:flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-[#5C2828]/10 text-[#5C2828] flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-circle-user text-base"></i>
+                        </div>
+                        <div class="text-left leading-tight">
+                            <p class="text-xs font-bold text-[#1E1E1E] truncate max-w-[10rem]">{{ auth()->user()->name }}</p>
+                            <p class="text-[10px] text-gray-400 font-medium">{{ auth()->user()->roleLabel() }}</p>
+                        </div>
                     </div>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" title="Logout"
-                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clip-rule="evenodd"/></svg>
-                            <span class="hidden sm:inline">Logout</span>
+                        <button type="submit" title="Keluar dari sistem"
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                            <span class="hidden sm:inline">Keluar</span>
                         </button>
                     </form>
                 </div>
                 @else
                 <a href="{{ route('login') }}"
-                   class="flex items-center gap-1.5 px-3 py-1.5 ml-1 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
-                    Login
+                   class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#FF8533] text-white hover:bg-[#EA6D1A] transition-all shadow-sm shadow-[#FF8533]/30">
+                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                    <span>Masuk</span>
                 </a>
                 @endauth
             </div>
         </div>
     </header>
 
-    {{-- Page Content --}}
+    {{-- Page Content Canvas: Abu-abu Kebiruan Terang (#F4F6F8) --}}
     <main class="flex-1 p-4 lg:p-6 max-w-screen-2xl w-full mx-auto">
         @yield('content')
     </main>
 
-    <footer class="px-6 py-3 text-center text-xs text-gray-400 border-t border-gray-100/80">
-        Sistem Absensi Siswa &middot; ESP32-S3 WROOM CAM + RFID RC522
+    {{-- Footer --}}
+    <footer class="px-6 py-4 text-center text-xs text-gray-500 border-t border-gray-200/70 bg-white/40">
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+            <img src="{{ asset('images/logo-sekolah.png') }}" alt="{{ $namaSekolah }}" class="w-4 h-4 object-contain inline-block">
+            <span class="font-semibold text-gray-700">{{ $namaSekolah }}</span>
+            <span>&middot;</span>
+            <span class="flex items-center gap-1.5 text-gray-500">
+                <i class="fa-solid fa-microchip text-[#FF8533]"></i>
+                ESP32-S3 WROOM CAM + RFID RC522
+            </span>
+        </div>
     </footer>
 </div>
 
@@ -336,7 +400,7 @@ function toggleSidebar() {
     o.classList.toggle('hidden');
 }
 
-// Clock
+// Live Clock
 setInterval(() => {
     const now = new Date();
     const pad = n => String(n).padStart(2,'0');
@@ -344,23 +408,44 @@ setInterval(() => {
     if (el) el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }, 1000);
 
-// Toast system
+// Modern Toast Notification with FontAwesome Icons (No Emojis)
 function showToast(type, msg, duration = 4000) {
     const c = document.getElementById('toastContainer');
-    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-amber-500' };
-    const icons  = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+    if (!c) return;
+    
+    // Forest Green for Success (#2E5A27), Red for Error, Bright Orange for Info (#FF8533), Amber for Warning
+    const colors = {
+        success: 'bg-[#2E5A27] text-white border border-[#2E5A27]/30 shadow-lg shadow-[#2E5A27]/20',
+        error:   'bg-red-600 text-white border border-red-700 shadow-lg shadow-red-600/20',
+        info:    'bg-[#FF8533] text-white border border-[#EA6D1A] shadow-lg shadow-[#FF8533]/20',
+        warning: 'bg-amber-600 text-white border border-amber-700 shadow-lg shadow-amber-600/20'
+    };
+    
+    const icons = {
+        success: '<i class="fa-solid fa-circle-check text-base"></i>',
+        error:   '<i class="fa-solid fa-circle-xmark text-base"></i>',
+        info:    '<i class="fa-solid fa-circle-info text-base"></i>',
+        warning: '<i class="fa-solid fa-triangle-exclamation text-base"></i>'
+    };
+
     const t = document.createElement('div');
-    t.className = `toast pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl text-white text-sm max-w-xs ${colors[type]||colors.info}`;
-    t.innerHTML = `<span class="font-bold text-base leading-none mt-0.5">${icons[type]||'ℹ'}</span><span class="flex-1">${msg}</span><button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 ml-1 text-lg leading-none">&times;</button>`;
+    t.className = `toast pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-medium max-w-sm ${colors[type] || colors.info}`;
+    t.innerHTML = `
+        <span class="shrink-0 mt-0.5">${icons[type] || icons.info}</span>
+        <span class="flex-1 leading-snug">${msg}</span>
+        <button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 transition-opacity ml-1.5 p-0.5 text-xs leading-none">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+    `;
     c.appendChild(t);
-    setTimeout(() => t.style.opacity = '0', duration - 300);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s ease'; }, duration - 300);
     setTimeout(() => t.remove(), duration);
 }
 
 // Show queued toasts
 (window._toasts || []).forEach(({type, msg}) => showToast(type, msg));
 
-// Expose globally for AJAX use
+// Expose globally for AJAX
 window.showToast = showToast;
 
 @admin
@@ -388,9 +473,9 @@ window.showToast = showToast;
                 if (!data.online) {
                     applyState('bg-red-500', 'bg-red-500', 'WA Tidak Aktif', 'Gateway offline', false);
                 } else if (data.connected) {
-                    applyState('bg-emerald-400', 'bg-emerald-400', 'WA Terhubung', 'Siap kirim notifikasi', true);
+                    applyState('bg-[#2E5A27]', 'bg-emerald-400', 'WA Terhubung', 'Siap kirim notifikasi', true);
                 } else if (data.qr) {
-                    applyState('bg-amber-400', 'bg-amber-400', 'Scan QR Code', 'Klik untuk buka scanner', false);
+                    applyState('bg-[#FF8533]', 'bg-[#FF8533]', 'Scan QR Code', 'Klik untuk buka scanner', false);
                 } else {
                     applyState('bg-amber-400', 'bg-amber-400', 'WA Menghubungkan', 'Menunggu koneksi...', false);
                 }

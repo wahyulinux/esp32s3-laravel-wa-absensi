@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kartu RFID — {{ $siswa->nama }}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪪</text></svg>">
+    <link rel="icon" href="{{ asset('images/logo-sekolah.png') }}" type="image/png">
     @include('siswa.partials.kartu-style')
     <style>
-        body { background: #f1f5f9; margin: 0; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+        body { background: #F4F6F8; margin: 0; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
         .toolbar {
             position: sticky; top: 0; z-index: 10;
-            background: #fff; border-bottom: 1px solid #e5e7eb;
+            background: #fff; border-bottom: 2px solid #FF8533;
             padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
         }
         .toolbar a, .toolbar button {
@@ -20,8 +20,8 @@
         }
         .btn-back { color: #4b5563; background: #f3f4f6; }
         .btn-back:hover { background: #e5e7eb; }
-        .btn-print { color: #fff; background: #2563eb; }
-        .btn-print:hover { background: #1d4ed8; }
+        .btn-print { color: #fff; background: #FF8533; }
+        .btn-print:hover { background: #EA6D1A; }
 
         .stage {
             display: flex; align-items: center; justify-content: center;

@@ -15,17 +15,39 @@
     }
 
     .kartu-header {
-        background: linear-gradient(135deg, #1e3a5f, #2563eb);
-        padding: 3.5mm 4mm 3mm;
-        text-align: center;
+        background: linear-gradient(135deg, #5C2828, #FF8533);
+        padding: 3mm 3.5mm 2.8mm;
         position: relative;
         flex-shrink: 0;
     }
-    .kartu-header-text { min-width: 0; }
+    .kartu-header-content {
+        display: flex;
+        align-items: center;
+        gap: 2mm;
+        padding-right: 4.5mm;
+    }
+    .kartu-logo-wrap {
+        width: 7.5mm;
+        height: 7.5mm;
+        border-radius: 1.2mm;
+        background: #fff;
+        padding: 0.4mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    }
+    .kartu-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .kartu-header-text { min-width: 0; text-align: left; flex: 1; }
     .kartu-sekolah {
         color: #fff;
         font-weight: 700;
-        font-size: 7.6pt;
+        font-size: 7.2pt;
         line-height: 1.2;
         margin: 0;
         display: -webkit-box;
@@ -34,18 +56,18 @@
         overflow: hidden;
     }
     .kartu-subtitle {
-        color: rgba(255,255,255,.75);
-        font-size: 5pt;
+        color: rgba(255,255,255,.85);
+        font-size: 4.8pt;
         letter-spacing: .02em;
-        margin: .8mm 0 0;
+        margin: .6mm 0 0;
     }
     .kartu-contactless {
         position: absolute;
         top: 2mm;
-        right: 2.2mm;
-        width: 4mm;
-        height: 4mm;
-        color: rgba(255,255,255,.75);
+        right: 2mm;
+        width: 3.8mm;
+        height: 3.8mm;
+        color: rgba(255,255,255,.8);
         transform: rotate(45deg);
     }
 
@@ -71,7 +93,7 @@
         justify-content: center;
         flex-shrink: 0;
         overflow: hidden;
-        box-shadow: 0 0 0 2px #fff, 0 0 0 2.6mm #eff6ff;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 2.6mm #FFF7ED;
     }
     .kartu-avatar img {
         width: 100%;
@@ -92,9 +114,9 @@
     }
     .kartu-kelas {
         display: inline-block;
-        background: #eff6ff;
-        color: #1d4ed8;
-        border: .18mm solid #bfdbfe;
+        background: #FFF7ED;
+        color: #C2410C;
+        border: .18mm solid #FED7AA;
         border-radius: 1.6mm;
         font-size: 6.6pt;
         font-weight: 700;
@@ -102,7 +124,7 @@
     }
 
     .kartu-footer {
-        background: #0f172a;
+        background: #5C2828;
         color: #fff;
         padding: 2.6mm 3mm;
         display: flex;

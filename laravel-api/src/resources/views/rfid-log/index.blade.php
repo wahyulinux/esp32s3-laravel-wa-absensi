@@ -2,37 +2,40 @@
 @section('title', 'Log UID Kartu')
 
 @section('breadcrumb')
-    <span class="text-gray-700 text-sm font-medium">Log UID Kartu</span>
+    <span class="text-gray-700 text-sm font-semibold">Log UID Kartu</span>
 @endsection
 
 @section('content')
 
 <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
     <div>
-        <h1 class="text-xl font-bold text-gray-900">Log UID Kartu</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Setiap scan RFID yang masuk ke server · disimpan 7 hari · refresh otomatis</p>
+        <h1 class="text-xl lg:text-2xl font-extrabold text-[#1E1E1E] tracking-tight">Log UID Kartu RFID</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mt-0.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-id-card text-[#FF8533]"></i>
+            <span>Setiap scan kartu RFID yang diterima server &middot; Disimpan 7 hari &middot; Real-time</span>
+        </p>
     </div>
-    <div class="flex items-center gap-2">
-        <span class="flex items-center gap-1.5 text-xs text-gray-400" id="log-last-update">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Live
+    <div class="flex items-center gap-2.5">
+        <span class="flex items-center gap-1.5 text-xs text-gray-500 bg-white px-2.5 py-1 rounded-full border border-gray-200" id="log-last-update">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#2E5A27] animate-pulse"></span>
+            <span>Live</span>
         </span>
         {{-- Filter status --}}
-        <div class="flex items-center gap-1.5" id="filter-bar">
+        <div class="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200" id="filter-bar">
             <button onclick="setFilter('')"
-                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-slate-800 text-white" data-filter="">
+                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#5C2828] text-white" data-filter="">
                 Semua
             </button>
             <button onclick="setFilter('masuk')"
-                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-white text-gray-500 border border-gray-200 hover:border-emerald-300" data-filter="masuk">
+                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-600 hover:text-[#2E5A27] hover:bg-[#2E5A27]/10" data-filter="masuk">
                 Masuk
             </button>
             <button onclick="setFilter('keluar')"
-                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-white text-gray-500 border border-gray-200 hover:border-blue-300" data-filter="keluar">
+                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-600 hover:text-[#FF8533] hover:bg-[#FF8533]/10" data-filter="keluar">
                 Keluar
             </button>
             <button onclick="setFilter('tidak_dikenal')"
-                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors bg-white text-gray-500 border border-gray-200 hover:border-red-300" data-filter="tidak_dikenal">
+                    class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-600 hover:text-red-600 hover:bg-red-50" data-filter="tidak_dikenal">
                 Tidak Dikenal
             </button>
         </div>
@@ -41,33 +44,33 @@
 
 {{-- Summary chips --}}
 <div class="flex flex-wrap gap-2 mb-4" id="summary-chips">
-    <span class="text-xs px-3 py-1.5 rounded-full bg-white border border-gray-200 text-gray-500 font-medium">
-        Total: <span id="cnt-all" class="font-bold text-gray-800">{{ count($entries) }}</span>
+    <span class="text-xs px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-600 font-semibold shadow-2xs">
+        Total: <span id="cnt-all" class="font-black text-[#1E1E1E]">{{ count($entries) }}</span>
     </span>
-    <span class="text-xs px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium">
-        Masuk: <span id="cnt-masuk" class="font-bold">{{ collect($entries)->where('status','masuk')->count() }}</span>
+    <span class="text-xs px-3 py-1.5 rounded-xl bg-[#2E5A27]/10 border border-[#2E5A27]/25 text-[#2E5A27] font-semibold">
+        Masuk: <span id="cnt-masuk" class="font-black">{{ collect($entries)->where('status','masuk')->count() }}</span>
     </span>
-    <span class="text-xs px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-medium">
-        Keluar: <span id="cnt-keluar" class="font-bold">{{ collect($entries)->where('status','keluar')->count() }}</span>
+    <span class="text-xs px-3 py-1.5 rounded-xl bg-[#FF8533]/10 border border-[#FF8533]/25 text-[#FF8533] font-semibold">
+        Keluar: <span id="cnt-keluar" class="font-black">{{ collect($entries)->where('status','keluar')->count() }}</span>
     </span>
-    <span class="text-xs px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-600 font-medium">
-        Tidak Dikenal: <span id="cnt-unknown" class="font-bold">{{ collect($entries)->where('status','tidak_dikenal')->count() }}</span>
+    <span class="text-xs px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-red-600 font-semibold">
+        Tidak Dikenal: <span id="cnt-unknown" class="font-black">{{ collect($entries)->where('status','tidak_dikenal')->count() }}</span>
     </span>
 </div>
 
 {{-- Tabel --}}
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
     <table class="w-full text-sm">
         <thead>
-            <tr class="border-b border-gray-100 bg-gray-50/70">
-                <th class="text-left px-5 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide w-36">Waktu</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">UID Kartu</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Siswa</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Kelas</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Ruangan</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">IP</th>
-                <th class="text-left px-4 py-3 text-gray-400 font-semibold text-xs uppercase tracking-wide">Status</th>
+            <tr class="border-b border-gray-100 bg-gray-50/50">
+                <th class="text-left px-5 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider w-36">Waktu</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">UID Kartu</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">Siswa</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">Kelas</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">Ruangan</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">IP Address</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-bold text-[11px] uppercase tracking-wider">Status</th>
             </tr>
         </thead>
         <tbody id="log-body" class="divide-y divide-gray-50">
@@ -80,11 +83,18 @@
                     default         => '',
                 };
                 $badgeCls = match($st) {
-                    'masuk'         => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                    'keluar'        => 'bg-blue-50 text-blue-700 border-blue-200',
+                    'masuk'         => 'bg-[#2E5A27]/10 text-[#2E5A27] border-[#2E5A27]/25',
+                    'keluar'        => 'bg-[#FF8533]/10 text-[#FF8533] border-[#FF8533]/25',
                     'tidak_dikenal' => 'bg-red-50 text-red-600 border-red-200',
-                    'sudah_lengkap' => 'bg-gray-100 text-gray-500 border-gray-200',
+                    'sudah_lengkap' => 'bg-gray-100 text-gray-600 border-gray-200',
                     default         => 'bg-gray-100 text-gray-500 border-gray-200',
+                };
+                $badgeIcon = match($st) {
+                    'masuk'         => 'fa-arrow-right-to-bracket',
+                    'keluar'        => 'fa-arrow-right-from-bracket',
+                    'tidak_dikenal' => 'fa-circle-xmark',
+                    'sudah_lengkap' => 'fa-circle-check',
+                    default         => 'fa-circle-info',
                 };
                 $badgeLabel = match($st) {
                     'masuk'         => 'Masuk',
@@ -94,54 +104,56 @@
                     default         => $st,
                 };
             @endphp
-            <tr class="hover:bg-slate-50/60 transition-colors {{ $rowClass }}">
+            <tr class="hover:bg-[#F4F6F8]/60 transition-colors {{ $rowClass }}">
                 <td class="px-5 py-3 font-mono text-xs text-gray-500 tabular-nums whitespace-nowrap">
                     {{ \Carbon\Carbon::createFromTimestamp($e['time'])->format('d/m H:i:s') }}
                 </td>
                 <td class="px-4 py-3">
                     <span class="font-mono text-xs font-bold tracking-widest px-2.5 py-1 rounded-lg border
-                        {{ $e['status'] === 'tidak_dikenal' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-slate-100 text-slate-700 border-slate-200' }}">
+                        {{ $e['status'] === 'tidak_dikenal' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-[#F4F6F8] text-[#5C2828] border-gray-200' }}">
                         {{ $e['rfid_uid'] }}
                     </span>
                 </td>
                 <td class="px-4 py-3 text-sm">
                     @if($e['siswa_nama'])
-                        <span class="font-semibold text-gray-800">{{ $e['siswa_nama'] }}</span>
+                        <span class="font-bold text-[#1E1E1E]">{{ $e['siswa_nama'] }}</span>
                     @else
-                        <span class="text-gray-300 italic text-xs">—</span>
+                        <span class="text-gray-400 italic text-xs">—</span>
                     @endif
                 </td>
                 <td class="px-4 py-3">
                     @if($e['siswa_kelas'])
-                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">{{ $e['siswa_kelas'] }}</span>
+                        <span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold">{{ $e['siswa_kelas'] }}</span>
                     @else
                         <span class="text-gray-300 text-xs">—</span>
                     @endif
                 </td>
                 <td class="px-4 py-3">
                     @if($e['device_id'])
-                        <span class="font-mono text-xs font-bold px-2 py-0.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg">{{ $e['device_id'] }}</span>
+                        <span class="font-mono text-xs font-bold px-2 py-0.5 bg-[#5C2828]/10 text-[#5C2828] border border-[#5C2828]/20 rounded-lg flex items-center gap-1 w-fit">
+                            <i class="fa-solid fa-satellite-dish text-[9px]"></i>
+                            {{ $e['device_id'] }}
+                        </span>
                     @else
                         <span class="text-gray-300 text-xs">—</span>
                     @endif
                 </td>
                 <td class="px-4 py-3 font-mono text-xs text-gray-400">{{ $e['ip'] ?? '—' }}</td>
                 <td class="px-4 py-3">
-                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border {{ $badgeCls }}">
-                        {{ $badgeLabel }}
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $badgeCls }}">
+                        <i class="fa-solid {{ $badgeIcon }} text-[10px]"></i>
+                        <span>{{ $badgeLabel }}</span>
                     </span>
                 </td>
             </tr>
             @empty
             <tr>
                 <td colspan="7" class="py-20 text-center">
-                    <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-gray-300">
-                            <path fill-rule="evenodd" d="M2.25 6a3 3 0 013-3h13.5a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3V6zm3.97.97a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 01-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 010-1.06zm4.28 4.28a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd"/>
-                        </svg>
+                    <div class="w-16 h-16 rounded-full bg-[#F4F6F8] flex items-center justify-center mx-auto mb-4 text-gray-400">
+                        <i class="fa-solid fa-credit-card text-3xl"></i>
                     </div>
-                    <p class="font-semibold text-gray-500">Belum ada log</p>
-                    <p class="text-sm text-gray-400 mt-1">Log akan muncul setiap kali ESP32 mengirim scan RFID</p>
+                    <p class="font-bold text-gray-600">Belum ada log scan</p>
+                    <p class="text-xs text-gray-400 mt-1">Log akan muncul setiap kali ESP32 mengirim data scan RFID</p>
                 </td>
             </tr>
             @endforelse
@@ -158,18 +170,18 @@ let activeFilter = '';
 let allEntries   = @json($entries);
 
 const STATUS_CFG = {
-    masuk:         { badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'Masuk' },
-    keluar:        { badge: 'bg-blue-50 text-blue-700 border-blue-200',          label: 'Keluar' },
-    tidak_dikenal: { badge: 'bg-red-50 text-red-600 border-red-200',             label: 'Tidak Dikenal' },
-    sudah_lengkap: { badge: 'bg-gray-100 text-gray-500 border-gray-200',         label: 'Sudah Lengkap' },
+    masuk:         { badge: 'bg-[#2E5A27]/10 text-[#2E5A27] border-[#2E5A27]/25', icon: 'fa-arrow-right-to-bracket', label: 'Masuk' },
+    keluar:        { badge: 'bg-[#FF8533]/10 text-[#FF8533] border-[#FF8533]/25', icon: 'fa-arrow-right-from-bracket', label: 'Keluar' },
+    tidak_dikenal: { badge: 'bg-red-50 text-red-600 border-red-200',             icon: 'fa-circle-xmark', label: 'Tidak Dikenal' },
+    sudah_lengkap: { badge: 'bg-gray-100 text-gray-600 border-gray-200',         icon: 'fa-circle-check', label: 'Sudah Lengkap' },
 };
 
 function setFilter(f) {
     activeFilter = f;
     document.querySelectorAll('.filter-btn').forEach(btn => {
         const active = btn.dataset.filter === f;
-        btn.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ' +
-            (active ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-blue-300');
+        btn.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all ' +
+            (active ? 'bg-[#5C2828] text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100');
     });
     renderTable(allEntries);
 }
@@ -195,29 +207,34 @@ function renderTable(entries) {
         return;
     }
 
+    const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
     tbody.innerHTML = filtered.slice(0, 500).map(e => {
         const cfg      = STATUS_CFG[e.status] || STATUS_CFG.sudah_lengkap;
         const rowCls   = e.status === 'tidak_dikenal' ? 'bg-red-50/40' : e.status === 'sudah_lengkap' ? 'bg-gray-50/60' : '';
         const uidCls   = e.status === 'tidak_dikenal'
             ? 'bg-red-50 text-red-700 border-red-200'
-            : 'bg-slate-100 text-slate-700 border-slate-200';
-        return `<tr class="hover:bg-slate-50/60 transition-colors ${rowCls}">
+            : 'bg-[#F4F6F8] text-[#5C2828] border-gray-200';
+        return `<tr class="hover:bg-[#F4F6F8]/60 transition-colors ${rowCls}">
             <td class="px-5 py-3 font-mono text-xs text-gray-500 tabular-nums whitespace-nowrap">${fmtTime(e.time)}</td>
             <td class="px-4 py-3">
-                <span class="font-mono text-xs font-bold tracking-widest px-2.5 py-1 rounded-lg border ${uidCls}">${e.rfid_uid}</span>
+                <span class="font-mono text-xs font-bold tracking-widest px-2.5 py-1 rounded-lg border ${uidCls}">${esc(e.rfid_uid)}</span>
             </td>
             <td class="px-4 py-3 text-sm">
-                ${e.siswa_nama ? `<span class="font-semibold text-gray-800">${e.siswa_nama}</span>` : '<span class="text-gray-300 italic text-xs">—</span>'}
+                ${e.siswa_nama ? `<span class="font-bold text-[#1E1E1E]">${esc(e.siswa_nama)}</span>` : '<span class="text-gray-400 italic text-xs">—</span>'}
             </td>
             <td class="px-4 py-3">
-                ${e.siswa_kelas ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">${e.siswa_kelas}</span>` : '<span class="text-gray-300 text-xs">—</span>'}
+                ${e.siswa_kelas ? `<span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold">${esc(e.siswa_kelas)}</span>` : '<span class="text-gray-300 text-xs">—</span>'}
             </td>
             <td class="px-4 py-3">
-                ${e.device_id ? `<span class="font-mono text-xs font-bold px-2 py-0.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg">${e.device_id}</span>` : '<span class="text-gray-300 text-xs">—</span>'}
+                ${e.device_id ? `<span class="font-mono text-xs font-bold px-2 py-0.5 bg-[#5C2828]/10 text-[#5C2828] border border-[#5C2828]/20 rounded-lg flex items-center gap-1 w-fit"><i class="fa-solid fa-satellite-dish text-[9px]"></i> ${esc(e.device_id)}</span>` : '<span class="text-gray-300 text-xs">—</span>'}
             </td>
-            <td class="px-4 py-3 font-mono text-xs text-gray-400">${e.ip || '—'}</td>
+            <td class="px-4 py-3 font-mono text-xs text-gray-400">${esc(e.ip || '—')}</td>
             <td class="px-4 py-3">
-                <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.badge}">${cfg.label}</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${cfg.badge}">
+                    <i class="fa-solid ${cfg.icon} text-[10px]"></i>
+                    <span>${cfg.label}</span>
+                </span>
             </td>
         </tr>`;
     }).join('');
@@ -232,9 +249,10 @@ async function pollLog() {
         allEntries = data;
         renderTable(allEntries);
         const now = new Date();
+        const pad = n => String(n).padStart(2,'0');
         document.getElementById('log-last-update').innerHTML =
-            `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Update ${now.toTimeString().slice(0,5)}`;
-        if (data.length > prev) showToast('info', `${data.length - prev} scan baru`);
+            `<span class="w-1.5 h-1.5 rounded-full bg-[#2E5A27] animate-pulse"></span> Update ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        if (data.length > prev) showToast('info', `${data.length - prev} scan kartu baru`);
     } catch(e) {}
 }
 
