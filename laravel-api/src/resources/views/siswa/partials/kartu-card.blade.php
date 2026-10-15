@@ -6,9 +6,14 @@
 <div class="kartu-wrap">
     <div class="kartu">
         <div class="kartu-header">
-            <div class="kartu-header-text">
-                <p class="kartu-sekolah">{{ $namaSekolah }}</p>
-                <p class="kartu-subtitle">Kartu Identitas Siswa &middot; TA {{ $tahunAjaran }}</p>
+            <div class="kartu-header-content">
+                <div class="kartu-logo-wrap">
+                    <img src="{{ asset('images/logo-sekolah.png') }}" class="kartu-logo" alt="Logo">
+                </div>
+                <div class="kartu-header-text">
+                    <p class="kartu-sekolah">{{ $namaSekolah }}</p>
+                    <p class="kartu-subtitle">Kartu Identitas Siswa &middot; TA {{ $tahunAjaran }}</p>
+                </div>
             </div>
             <svg class="kartu-contactless" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M8.5 8.5a5 5 0 017 7"/>
