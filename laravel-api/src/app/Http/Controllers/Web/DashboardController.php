@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Device;
+use App\Models\Setting;
 use App\Models\Siswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -25,9 +26,10 @@ class DashboardController extends Controller
         $perKelas       = $this->perKelas();
 
         $devices = Device::orderBy('device_id')->get();
+        $namaSekolah = Setting::get('nama_sekolah', 'Sistem Absensi');
 
         return view('dashboard.index', compact(
-            'totalSiswa', 'hadirHariIni', 'sudahPulang', 'belumPulang', 'absensiTerbaru', 'perKelas', 'devices'
+            'totalSiswa', 'hadirHariIni', 'sudahPulang', 'belumPulang', 'absensiTerbaru', 'perKelas', 'devices', 'namaSekolah'
         ));
     }
 

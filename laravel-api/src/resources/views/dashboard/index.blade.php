@@ -13,7 +13,7 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
     <div class="flex items-center gap-3.5">
         <div class="w-12 h-12 rounded-2xl bg-white p-1.5 flex items-center justify-center shadow-xs border border-gray-200/80 shrink-0">
-            <img src="{{ asset('images/logo-sekolah.png') }}" alt="{{ $namaSekolah }}" class="w-full h-full object-contain">
+            <img src="{{ asset('images/logo-sekolah.png') }}" alt="{{ $namaSekolah ?? 'Logo Sekolah' }}" class="w-full h-full object-contain">
         </div>
         <div>
             <h1 class="text-xl lg:text-2xl font-extrabold text-[#1E1E1E] tracking-tight">Dashboard Absensi Siswa</h1>
@@ -21,7 +21,7 @@
                 <i class="fa-regular fa-calendar-check text-[#FF8533]"></i>
                 <span>{{ now()->translatedFormat('l, d F Y') }}</span>
                 <span class="text-gray-300">&middot;</span>
-                <span class="text-gray-500 font-medium">{{ $namaSekolah }}</span>
+                <span class="text-gray-500 font-medium">{{ $namaSekolah ?? 'Sistem Absensi' }}</span>
             </p>
         </div>
     </div>
