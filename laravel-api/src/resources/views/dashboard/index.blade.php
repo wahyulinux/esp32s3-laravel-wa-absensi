@@ -21,7 +21,7 @@
                 <i class="fa-regular fa-calendar-check text-[#FF8533]"></i>
                 <span>{{ now()->translatedFormat('l, d F Y') }}</span>
                 <span class="text-gray-300">&middot;</span>
-                <span class="text-gray-500 font-medium">{{ $namaSekolah ?? 'Sistem Absensi' }}</span>
+                <span class="text-gray-500 font-medium">{{ $namaSekolah ?? 'Sistem Absensi SMKS Nurul Amalia' }}</span>
             </p>
         </div>
     </div>

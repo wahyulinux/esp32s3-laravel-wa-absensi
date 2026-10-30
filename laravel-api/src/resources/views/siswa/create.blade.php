@@ -13,13 +13,13 @@
 
     {{-- Page Header --}}
     <div class="mb-6">
-        <h1 class="text-xl font-bold text-gray-900">Daftarkan Siswa Baru</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Isi data siswa dan UID kartu RFID</p>
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Daftarkan Siswa Baru</h1>
+        <p class="mt-1 text-sm text-slate-500">Isi data siswa dan UID kartu RFID</p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
-            <p class="text-sm font-semibold text-gray-700">Informasi Siswa</p>
+    <x-card class="overflow-hidden">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <p class="text-sm font-semibold text-slate-800">Informasi Siswa</p>
         </div>
         <div class="p-6">
         <form method="POST" action="{{ route('siswa.store') }}" enctype="multipart/form-data" class="space-y-5">
@@ -28,14 +28,11 @@
             @include('siswa.partials.foto-input', ['allowHapus' => false])
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                <x-label>
                     UID Kartu RFID <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="rfid_uid" value="{{ old('rfid_uid') }}"
-                       placeholder="Contoh: AABBCCDD"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono tracking-widest uppercase
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                              @error('rfid_uid') border-red-400 bg-red-50 @enderror">
+                </x-label>
+                <x-input name="rfid_uid" value="{{ old('rfid_uid') }}" placeholder="Contoh: AABBCCDD"
+                         class="font-mono uppercase tracking-widest @error('rfid_uid') border-red-400 bg-red-50 @enderror" />
                 @error('rfid_uid')
                 <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
@@ -46,26 +43,20 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIS <span class="text-gray-400 font-normal">(opsional)</span></label>
-                <input type="text" name="nis" value="{{ old('nis') }}"
-                       placeholder="Nomor Induk Siswa"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                              @error('nis') border-red-400 bg-red-50 @enderror">
+                <x-label>NIS <span class="font-normal text-slate-400">(opsional)</span></x-label>
+                <x-input name="nis" value="{{ old('nis') }}" placeholder="Nomor Induk Siswa"
+                         class="@error('nis') border-red-400 bg-red-50 @enderror" />
                 @error('nis')
                 <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                <x-label>
                     Nama Lengkap <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="nama" value="{{ old('nama') }}"
-                       placeholder="Nama lengkap siswa"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                              @error('nama') border-red-400 bg-red-50 @enderror">
+                </x-label>
+                <x-input name="nama" value="{{ old('nama') }}" placeholder="Nama lengkap siswa"
+                         class="@error('nama') border-red-400 bg-red-50 @enderror" />
                 @error('nama')
                 <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                 @enderror
@@ -73,16 +64,13 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kelas <span class="text-gray-400 font-normal">(opsional)</span></label>
-                    <select name="kelas_id"
-                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
-                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                                   @error('kelas_id') border-red-400 bg-red-50 @enderror">
+                    <x-label>Kelas <span class="font-normal text-slate-400">(opsional)</span></x-label>
+                    <x-select name="kelas_id" class="@error('kelas_id') border-red-400 bg-red-50 @enderror">
                         <option value="">— Pilih Kelas —</option>
                         @foreach($kelasMasterList as $k)
                         <option value="{{ $k->id }}" {{ (string) old('kelas_id') === (string) $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
                         @endforeach
-                    </select>
+                    </x-select>
                     @error('kelas_id')
                     <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                     @enderror
@@ -92,16 +80,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Jurusan <span class="text-gray-400 font-normal">(opsional)</span></label>
-                    <select name="jurusan_id"
-                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white
-                                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                                   @error('jurusan_id') border-red-400 bg-red-50 @enderror">
+                    <x-label>Jurusan <span class="font-normal text-slate-400">(opsional)</span></x-label>
+                    <x-select name="jurusan_id" class="@error('jurusan_id') border-red-400 bg-red-50 @enderror">
                         <option value="">— Pilih Jurusan —</option>
                         @foreach($jurusanList as $j)
                         <option value="{{ $j->id }}" {{ (string) old('jurusan_id') === (string) $j->id ? 'selected' : '' }}>{{ $j->nama }} ({{ $j->kode }})</option>
                         @endforeach
-                    </select>
+                    </x-select>
                     @error('jurusan_id')
                     <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                     @enderror
@@ -112,10 +97,10 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                <x-label>
                     No. HP Orang Tua
                     <span class="text-gray-400 font-normal">(opsional)</span>
-                </label>
+                </x-label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,11 +108,8 @@
                                   d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
-                           placeholder="08xxxxxxxxxx"
-                           class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm
-                                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow
-                                  @error('no_hp_ortu') border-red-400 bg-red-50 @enderror">
+                    <x-input name="no_hp_ortu" value="{{ old('no_hp_ortu') }}" placeholder="08xxxxxxxxxx"
+                             class="pl-10 @error('no_hp_ortu') border-red-400 bg-red-50 @enderror" />
                 </div>
                 @error('no_hp_ortu')
                 <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
@@ -136,17 +118,14 @@
             </div>
 
             <div class="flex gap-3 pt-2 border-t border-gray-100">
-                <button type="submit"
-                        class="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm">
-                    Daftarkan Siswa
-                </button>
+                    <x-button.primary type="submit">Daftarkan Siswa</x-button.primary>
                 <a href="{{ route('siswa.index') }}"
-                   class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors">
+                   class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
                     Batal
                 </a>
             </div>
         </form>
         </div>
-    </div>
+    </x-card>
 </div>
 @endsection
